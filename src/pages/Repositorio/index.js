@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Container, Owner, Loading, BackButton, IssuesList, PageActions } from "./styles";
+import { Container, Owner, Loading, BackButton, IssuesList, PageActions, FilterList } from "./styles";
 import { FaArrowLeft } from "react-icons/fa";
 import api from "../../services/api";
 
@@ -9,13 +9,21 @@ export default function Repositorio() {
   // Váriaveis usadas para armazenar os estados do repositório e as issues
 
   // Váriavel usada para armazenar o repositório
-  const [repositorios, setRepositorios] = useState({}); 
+  const [repositorios, setRepositorios] = useState({});
   // Váriavel usada para armazenar as issues
-  const [issues, setIssues] = useState([]); 
+  const [issues, setIssues] = useState([]);
   // Váriavel usada para armazenar o estado de loading
-  const [loading, setLoading] = useState(true); 
+  const [loading, setLoading] = useState(true);
   // Váriavel usada para armazenar a página atual
-  const [page, setPage] = useState(1); 
+  const [page, setPage] = useState(1);
+  // Váriavel usada para armazenar os filtros das issues
+  const [filters, setFilters] = useState([
+    { state: 'all', label: 'Todas', active: true },
+    { state: 'open', label: 'Abertas', active: false },
+    { state: 'closed', label: 'Fechadas', active: false }
+  ]);
+  // Váriavel usada para armazenar o índice do filtro ativo
+  const [filterIndex, setFilterIndex] = useState(0);
 
   // Váriaveis usadas para pegar o parâmetro da URL
   // e decodificá-lo, pois o nome do repositório pode conter caracteres especiais
@@ -30,7 +38,10 @@ export default function Repositorio() {
         const [repositorioData, issuesData] = await Promise.all([
           api.get(`/repos/${nomeRepo}`),
           api.get(`/repos/${nomeRepo}/issues`, {
-            params: { state: 'open', per_page: 5, }
+            params: {
+              state: filters.find(f => f.active).state,
+              per_page: 5,
+            }
           })
         ]);
 
@@ -47,26 +58,32 @@ export default function Repositorio() {
   }, [nomeRepo]);
 
   useEffect(() => {
-    
-    async function loadIssue(){
+
+    async function loadIssue() {
       const nomeRepo = decodeURIComponent(repositorio);
 
       const response = await api.get(`/repos/${nomeRepo}/issues`, {
-        params: { state: 'open', per_page: 5, page }, // carrega as issues da página atual
+        params: { 
+          state: filters[filterIndex].state, // pega o estado do filtro ativo
+          per_page: 5, 
+          page }, // carrega as issues da página atual
       });
       setIssues(response.data); // armazena as issues na variável de estado
     }
 
     loadIssue();
 
-  }, [page, repositorio]); // carrega as issues quando a página ou o repositório muda
+  }, [page, repositorio, filterIndex, filters]); // carrega as issues quando a página ou o repositório muda
 
 
   // Função para carregar mais issues
   function handlePage(action) {
-    setPage (action === 'back' ? page - 1 : page + 1); // altera a página atual
+    setPage(action === 'back' ? page - 1 : page + 1); // altera a página atual
   }
 
+  function handleFilter(index) {
+    setFilterIndex(index); // altera o índice do filtro ativo
+  }
 
   if (loading) {
     return (
@@ -89,6 +106,20 @@ export default function Repositorio() {
         <h1>{repositorios.name}</h1>
         <p>{repositorios.description}</p>
       </Owner>
+
+      <FilterList active={filterIndex}>
+        {filters.map((filter, index) => (
+          <button
+            type="button"
+            key={String(filter.label)}
+            onClick={() => handleFilter(index)}
+            className={filter.active ? 'active' : ''}
+          >
+            {filter.label}
+          </button>
+        ))}
+
+      </FilterList>
 
       <IssuesList>
         {issues.map(issue => (

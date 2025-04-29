@@ -138,3 +138,21 @@ button{
     }
 }
 `;
+
+export const FilterList = styled.div`
+margin: 20px 0;
+
+button{
+    outline: 0;
+    border: 0;
+    padding: 8px;
+    border-radius: 4px;
+    margin: 0 10px;
+
+    &:nth-child(${props => props.active + 1}){
+        background: #0D2636;
+        color: #fff;
+    }
+}
+
+`;
