@@ -1,6 +1,6 @@
 # Projeto React + GitHub API
 
-Este é um projeto simples desenvolvido com **React** puro (sem frameworks como Next.js), com o objetivo de **aprofundar os conhecimentos na biblioteca React**.  
+Este é um projeto simples desenvolvido com **React** puro com o objetivo de **aprofundar os conhecimentos na biblioteca React**.  
 A aplicação consome a **API do GitHub** e utiliza **Styled Components** para estilização dos componentes.
 
 ## 🚀 Tecnologias Utilizadas
